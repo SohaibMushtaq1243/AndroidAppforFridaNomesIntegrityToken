@@ -1,6 +1,15 @@
 package com.stuck;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.text.format.Formatter;
 import android.util.Log;
+import java.net.*;
+import java.util.Collections;
+import java.util.Enumeration;
 
 import androidx.annotation.NonNull;
 
@@ -30,14 +39,29 @@ public class FridaModule extends ReactContextBaseJavaModule {
         Log.d("CalendarModule", "Create event called with name: and location:");
         callback.invoke("data return from callback");
     }
-    @ReactMethod
-    public void requestIntegrityToken(String nonce,Callback callback) {
-        IntegrityManager integrityManager = IntegrityManagerFactory.create(getReactApplicationContext());
+//    @ReactMethod
+//    public static String getLocalIpAddress() throws SocketException {
+//        WifiManager wifiManager = (WifiManager) getReactApplicationContext().getSystemService(Context.WIFI_SERVICE);
+//        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+//        int ipInt = wifiInfo.getIpAddress();
+//        if (ipInt == 0) {
+//            return null; // Not connected to Wi-Fi
+//        }
+//        return String.format("%d.%d.%d.%d",
+//                (ipInt & 0xff), (ipInt >> 8 & 0xff), (ipInt >> 16 & 0xff), (ipInt >> 24 & 0xff));
+//    }
 
+
+
+    @ReactMethod
+    public void requestIntegrityToken(String nonce,String cloud ,Callback callback) {
+//        callback.invoke(Long.parseLong(cloud));
+        IntegrityManager integrityManager = IntegrityManagerFactory.create(getReactApplicationContext());
+        long num = Long.parseLong(cloud);
         integrityManager.requestIntegrityToken(
                         IntegrityTokenRequest.builder()
                                 .setNonce(nonce)
-                                .setCloudProjectNumber(2131889799)
+                                .setCloudProjectNumber(num)
                                 .build())
                 .addOnCompleteListener(new OnCompleteListener() {
 
@@ -45,7 +69,7 @@ public class FridaModule extends ReactContextBaseJavaModule {
                         if (task.isSuccessful()) {
                             IntegrityTokenResponse result = (IntegrityTokenResponse) task.getResult();
                             String integrityToken = result.token();
-                            callback.invoke("MainActivity Integrity Token: " + integrityToken);
+                            callback.invoke(integrityToken);
                         } else {
                             Exception exception = task.getException();
                             callback.invoke("MainActivity Failed to get integrity token"+ exception);
